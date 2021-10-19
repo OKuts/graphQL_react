@@ -1,18 +1,44 @@
 const express = require('express');
 const {graphqlHTTP} = require('express-graphql');
 const cors = require('cors');
-// const router = require('./routes/router')
+const schema = require('./schema');
+const users = [{id: 1, username: 'Peter', age: 25}];
 
 const PORT = process.env.PORT || 5000;
 const app = express();
-// app.use(express.json());
+
 app.use(cors());
-// app.use('/auth', router);
+
+const createUser = (input) => {
+  const id = Date.now();
+  return {
+    id, ...input
+  }
+}
+
+const root = {
+  getAllUsers: () => {
+    return users
+  },
+  getUser: ({id}) => {
+    return users.find(user => user.id == id)
+  },
+  createUser: ({input}) => {
+    const user = createUser(input);
+    users.push(user);
+    return user;
+  }
+}
+
+
+
+
 app.use('/graphql', graphqlHTTP({
-  graphiql: true
+  graphiql: true,
+  schema,
+  rootValue: root
 }));
 
-// const createPath = page => path.resolve(__dirname, 'pages', `${page}.html`);
 
 const start = async () => {
   try {
